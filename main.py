@@ -10,41 +10,15 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from utils import create_dir, write_json, file_to_set
 
 # Constants
 INPUT_FILE = 'links.txt'
 OUTPUT_DIR = 'data'
 NUMBER_OF_THREADS = 8
 
-# Queue and Directory Setup
 queue = Queue()
 create_dir(OUTPUT_DIR)
-
-# Create Directory
-
-
-def create_dir(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-# Write JSON Data to File
-
-
-def write_json(file_name, data):
-    with open(file_name, 'w') as f:
-        json.dump(data, f)
-
-# Convert File to Set of URLs
-
-
-def file_to_set(file_name):
-    results = set()
-    with open(file_name, 'rt') as f:
-        for line in f:
-            results.add(line.replace('\n', ''))
-    return results
-
-# Tag Class for HTML Elements
 
 
 class Tag:
@@ -67,8 +41,6 @@ class Tag:
             'attributes': self.attributes if self.attributes else None
         }
 
-# Domain Class for URL Parsing
-
 
 class Domain:
     def __init__(self, url):
@@ -85,8 +57,6 @@ class Domain:
     def get_sub_domain(self):
         return urlparse(self.url).netloc
 
-# ResponseParser Class
-
 
 class ResponseParser:
     def __init__(self, response):
@@ -100,8 +70,6 @@ class ResponseParser:
                 key, value = line.split(':', 1)
                 header_dict[key.strip()] = value.strip()
         return header_dict
-
-# PageParser Class
 
 
 class PageParser:
@@ -119,8 +87,6 @@ class PageParser:
                 t.add_attribute(attr, value)
             tags.append(t.get_data())
         return tags
-
-# MasterParser Class
 
 
 class MasterParser:
@@ -171,22 +137,14 @@ def is_page_dynamic(url):
     try:
         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
         if response.status_code != 200:
-            return False  # Can't determine if non-200 response
-
+            return False
         soup = BeautifulSoup(response.text, 'html.parser')
-
-        # Check for a large number of script tags
         scripts = soup.find_all('script')
-        if len(scripts) > 5:  # Arbitrary threshold
+        if len(scripts) > 5:
             return True
-
-        # Check for minimal body content
         body_text = soup.find('body').get_text(strip=True)
-        if len(body_text) < 50:  # Arbitrary threshold
+        if len(body_text) < 50:
             return True
-
-        # Other heuristics can be added here
-
     except requests.RequestException as e:
         print(f"Error checking URL {url}: {e}")
         return False
@@ -194,17 +152,14 @@ def is_page_dynamic(url):
     return False
 
 
-# Worker Thread Function
 def work():
     while True:
         url = queue.get()
-        if is_page_dynamic(url):  # Replace with actual logic to determine if URL is dynamic
+        if is_page_dynamic(url):
             MasterParser.parse_dynamic(url, OUTPUT_DIR, str(queue.qsize()))
         else:
             MasterParser.parse(url, OUTPUT_DIR, str(queue.qsize()))
         queue.task_done()
-
-# Create Worker Threads
 
 
 def create_workers():
@@ -213,8 +168,6 @@ def create_workers():
         t.daemon = True
         t.start()
 
-# Create Jobs from URLs
-
 
 def create_jobs():
     for url in file_to_set(INPUT_FILE):
@@ -222,7 +175,6 @@ def create_jobs():
     queue.join()
 
 
-# Main Execution
 if __name__ == "__main__":
     create_dir(OUTPUT_DIR)
     create_workers()
