@@ -6,11 +6,15 @@ A sophisticated web parsing tool designed to handle both static and dynamic web 
 
 
 ### Features
-Multi-threaded Crawling: Leverages threading for efficient crawling of multiple URLs concurrently.
-Dynamic Content Handling: Uses Selenium to parse content dynamically loaded by JavaScript.
-HTML Parsing: Beautiful Soup is employed for easy and effective parsing of HTML content.
-JSON Output: Extracted data is saved in a structured JSON format for easy integration and analysis.
-Customizable: Can be tailored to specific crawling and parsing requirements.
+**Multi-threaded Crawling**: Leverages threading for efficient crawling of multiple URLs concurrently.
+
+**Dynamic Content Handling**: Uses Selenium to parse content dynamically loaded by JavaScript.
+
+**HTML Parsing**: Beautiful Soup is employed for easy and effective parsing of HTML content.
+
+**JSON Output**: Extracted data is saved in a structured JSON format for easy integration and analysis.
+
+**Customizable**: Can be tailored to specific crawling and parsing requirements.
 
 ### Setup
 
