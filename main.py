@@ -76,6 +76,7 @@ class PageParser:
     def __init__(self, html_string):
         self.soup = BeautifulSoup(html_string, 'html.parser')
         self.all_tags = self.parse()
+        self.all_text = self.extract_text()
 
     def parse(self):
         tags = []
@@ -87,6 +88,15 @@ class PageParser:
                 t.add_attribute(attr, value)
             tags.append(t.get_data())
         return tags
+
+    def extract_text(self):
+        text_content = {}
+        for tag in self.soup.find_all(True):
+            tag_text = tag.get_text(strip=True)
+            if tag_text:
+                key = f"{tag.name}_{tag.attrs.get('id', '')}_{tag.attrs.get('class', '')}"
+                text_content[key] = tag_text
+        return text_content
 
 
 class MasterParser:
@@ -101,7 +111,8 @@ class MasterParser:
                     'url': url,
                     'status': resp.getcode(),
                     'headers': resp_parser.headers,
-                    'tags': page_parser.all_tags
+                    'tags': page_parser.all_tags,
+                    'text': page_parser.all_text,
                 }
                 write_json(os.path.join(
                     output_dir, f'{output_file}.json'), json_results)
@@ -120,7 +131,8 @@ class MasterParser:
             json_results = {
                 'url': url,
                 'status': 200,
-                'tags': page_parser.all_tags
+                'tags': page_parser.all_tags,
+                'text': page_parser.all_text,
             }
             write_json(os.path.join(
                 output_dir, f'{output_file}.json'), json_results)
